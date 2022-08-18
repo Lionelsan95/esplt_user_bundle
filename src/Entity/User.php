@@ -2,13 +2,14 @@
 
 namespace App\Entity;
 
+use App\Entity\Abstrct\BaseEntity;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-class User
+class User extends BaseEntity
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
