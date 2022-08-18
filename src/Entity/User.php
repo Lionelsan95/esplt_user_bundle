@@ -4,11 +4,13 @@ namespace App\Entity;
 
 use App\Entity\Abstrct\BaseEntity;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
+#[ORM\Table(name: 'users')]
 class User extends BaseEntity
 {
     #[ORM\Id]
@@ -25,6 +27,14 @@ class User extends BaseEntity
 
     #[ORM\Column(length: 30)]
     private ?string $lastname = null;
+
+    #[ORM\OneToMany(mappedBy: 'usr', targetEntity: Password::class, orphanRemoval: true)]
+    private Collection $passwords;
+
+    public function __construct()
+    {
+        $this->passwords = new ArrayCollection();
+    }
 
     public function getId(): ?Uuid
     {
@@ -63,6 +73,36 @@ class User extends BaseEntity
     public function setLastname(string $lastname): self
     {
         $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Password>
+     */
+    public function getPasswords(): Collection
+    {
+        return $this->passwords;
+    }
+
+    public function addPassword(Password $password): self
+    {
+        if (!$this->passwords->contains($password)) {
+            $this->passwords->add($password);
+            $password->setUsr($this);
+        }
+
+        return $this;
+    }
+
+    public function removePassword(Password $password): self
+    {
+        if ($this->passwords->removeElement($password)) {
+            // set the owning side to null (unless already changed)
+            if ($password->getUsr() === $this) {
+                $password->setUsr(null);
+            }
+        }
 
         return $this;
     }
