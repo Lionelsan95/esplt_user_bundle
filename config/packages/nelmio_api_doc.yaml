@@ -1,0 +1,22 @@
+nelmio_api_doc:
+    documentation:
+        servers:
+            - url: https://localhost:8000/
+              description: Local API
+        info:
+            title: User bundle
+            description: User bundle
+            version: 1.0.0
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+        security:
+            - Bearer: []
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+        host_patterns:
+            - ^api\.
