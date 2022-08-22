@@ -7,11 +7,16 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * @method string getUserIdentifier()
+ */
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
-class User extends BaseEntity
+class User extends BaseEntity implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
@@ -27,6 +32,12 @@ class User extends BaseEntity
 
     #[ORM\Column(length: 30)]
     private ?string $lastname = null;
+
+    #[ORM\Column]
+    private ?string $password = null;
+
+    #[ORM\Column(type: 'json')]
+    private ?array $roles = [];
 
     #[ORM\OneToMany(mappedBy: 'usr', targetEntity: Password::class, orphanRemoval: true)]
     private Collection $passwords;
@@ -103,6 +114,58 @@ class User extends BaseEntity
                 $password->setUsr(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * Returning a Salt is not necessary if you use a modern hashing algorithm like bcrypt, sodium etc. in security.yaml
+     * @return string|void|null
+     */
+    public function getSalt(): ?string
+    {
+        return null;
+    }
+
+    public function eraseCredentials()
+    {
+        // TODO: Implement eraseCredentials() method.
+    }
+
+    public function getUsername(): ?string
+    {
+        return $this->email;
+    }
+
+    public function __call(string $name, array $arguments)
+    {
+        // TODO: Implement @method string getUserIdentifier()
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): self
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
 
         return $this;
     }
